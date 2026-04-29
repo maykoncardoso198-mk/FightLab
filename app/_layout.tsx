@@ -57,6 +57,7 @@ export default function RootLayout() {
             options={{ animation: 'fade', gestureEnabled: false }}
           />
           <Stack.Screen name="dashboard" />
+          <Stack.Screen name="(admin)" />
           <Stack.Screen name="chat/[id]" />
         </Stack>
       </SafeAreaProvider>

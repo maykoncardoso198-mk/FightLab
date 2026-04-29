@@ -63,7 +63,7 @@ export interface User {
   email: string;
   city: string;
   photo: string;
-  role: 'student' | 'trainer';
+  role: 'student' | 'trainer' | 'admin';
   favoriteTrainerIds: string[];
 }
 

@@ -130,6 +130,13 @@ export default function ProfileScreen() {
         </Section>
 
         <View style={styles.menu}>
+          {user?.role === 'admin' && (
+            <MenuItem
+              icon="shield-checkmark-outline"
+              label="ÁREA ADMIN"
+              onPress={() => router.push('/(admin)')}
+            />
+          )}
           <MenuItem icon="card-outline" label="Pagamentos" />
           <MenuItem icon="notifications-outline" label="Notificações" />
           <MenuItem icon="help-circle-outline" label="Ajuda e suporte" />

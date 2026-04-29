@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { mockStudent, mockTrainerUser, User } from '../data';
+import { mockStudent, mockTrainerUser, mockAdmin, User } from '../data';
 
 const KEY = '@fightlab/user';
 
-export type UserRole = 'student' | 'trainer';
+export type UserRole = 'student' | 'trainer' | 'admin';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -21,7 +21,7 @@ export function useAuth() {
   }, []);
 
   const signIn = useCallback(async (role: UserRole, name?: string) => {
-    const base = role === 'trainer' ? mockTrainerUser : mockStudent;
+    const base = role === 'trainer' ? mockTrainerUser : role === 'admin' ? mockAdmin : mockStudent;
     const u = { ...base, name: name || base.name };
     await AsyncStorage.setItem(KEY, JSON.stringify(u));
     setUser(u);

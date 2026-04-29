@@ -30,6 +30,11 @@ export default function LoginScreen() {
     router.replace('/(tabs)');
   };
 
+  const handleAdminAccess = async () => {
+    await signIn('admin');
+    router.replace('/(admin)');
+  };
+
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
@@ -96,6 +101,11 @@ export default function LoginScreen() {
             <Text style={styles.bottomLinkText}>
               Não tem conta? <Text style={{ color: Colors.red, fontFamily: Fonts.bodyBold }}>Cadastre-se</Text>
             </Text>
+          </Pressable>
+
+          <Pressable style={styles.adminLink} onPress={handleAdminAccess}>
+            <Ionicons name="shield-checkmark-outline" size={13} color={Colors.textMuted} />
+            <Text style={styles.adminLinkText}>Acesso Admin (demo)</Text>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -195,5 +205,19 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontFamily: Fonts.bodyRegular,
     fontSize: 14,
+  },
+  adminLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 20,
+    paddingVertical: 8,
+  },
+  adminLinkText: {
+    color: Colors.textMuted,
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 12,
+    letterSpacing: 0.5,
   },
 });

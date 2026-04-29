@@ -89,6 +89,56 @@ export const mockChatMessages: ChatMessage[] = [
   },
 ];
 
+export const mockAdmin: User = {
+  id: 'admin1',
+  name: 'Admin FightLab',
+  email: 'admin@fightlab.com',
+  city: 'São Paulo',
+  photo: 'https://i.pravatar.cc/300?img=70',
+  role: 'admin',
+  favoriteTrainerIds: [],
+};
+
+export const mockStudents: User[] = [
+  { id: 'u3',  name: 'Carlos Menezes',    email: 'carlos.m@fightlab.com',   city: 'São Paulo',      photo: 'https://i.pravatar.cc/300?img=12', role: 'student', favoriteTrainerIds: ['t1'] },
+  { id: 'u4',  name: 'Juliana Torres',    email: 'juliana.t@fightlab.com',   city: 'São Paulo',      photo: 'https://i.pravatar.cc/300?img=45', role: 'student', favoriteTrainerIds: ['t2', 't5'] },
+  { id: 'u5',  name: 'Pedro Rocha',       email: 'pedro.r@fightlab.com',     city: 'Rio de Janeiro', photo: 'https://i.pravatar.cc/300?img=33', role: 'student', favoriteTrainerIds: ['t3'] },
+  { id: 'u6',  name: 'Marina Lima',       email: 'marina.l@fightlab.com',    city: 'São Paulo',      photo: 'https://i.pravatar.cc/300?img=20', role: 'student', favoriteTrainerIds: ['t2'] },
+  { id: 'u7',  name: 'Fernando Alves',    email: 'fernando.a@fightlab.com',  city: 'Belo Horizonte', photo: 'https://i.pravatar.cc/300?img=53', role: 'student', favoriteTrainerIds: ['t5'] },
+  { id: 'u8',  name: 'Camila Sousa',      email: 'camila.s@fightlab.com',    city: 'Belo Horizonte', photo: 'https://i.pravatar.cc/300?img=47', role: 'student', favoriteTrainerIds: ['t5', 't6'] },
+  { id: 'u9',  name: 'André Vieira',      email: 'andre.v@fightlab.com',     city: 'Curitiba',       photo: 'https://i.pravatar.cc/300?img=15', role: 'student', favoriteTrainerIds: ['t4'] },
+  { id: 'u10', name: 'Patricia Oliveira', email: 'patricia.o@fightlab.com',  city: 'Salvador',       photo: 'https://i.pravatar.cc/300?img=49', role: 'student', favoriteTrainerIds: ['t7'] },
+];
+
+export const allStudents: User[] = [mockStudent, ...mockStudents];
+
+export const mockAllBookings: Booking[] = [
+  ...mockBookings,
+  { id: 'b4',  trainerId: 't1', studentId: 'u3',  date: '2026-04-28', time: '07:00', duration: 60, price: 180, status: 'completed',  paymentMethod: 'pix' },
+  { id: 'b5',  trainerId: 't2', studentId: 'u4',  date: '2026-05-03', time: '09:00', duration: 60, price: 200, status: 'confirmed',   paymentMethod: 'card' },
+  { id: 'b6',  trainerId: 't3', studentId: 'u5',  date: '2026-04-25', time: '07:00', duration: 60, price: 220, status: 'completed',   paymentMethod: 'pix' },
+  { id: 'b7',  trainerId: 't4', studentId: 'u9',  date: '2026-05-05', time: '18:00', duration: 60, price: 250, status: 'confirmed',   paymentMethod: 'card' },
+  { id: 'b8',  trainerId: 't5', studentId: 'u7',  date: '2026-04-20', time: '09:00', duration: 60, price: 170, status: 'cancelled',   paymentMethod: 'pix' },
+  { id: 'b9',  trainerId: 't6', studentId: 'u8',  date: '2026-04-22', time: '16:00', duration: 60, price: 190, status: 'completed',   paymentMethod: 'subscription' },
+  { id: 'b10', trainerId: 't7', studentId: 'u10', date: '2026-05-01', time: '17:00', duration: 60, price: 130, status: 'confirmed',   paymentMethod: 'pix' },
+  { id: 'b11', trainerId: 't8', studentId: 'u5',  date: '2026-04-15', time: '21:00', duration: 60, price: 210, status: 'completed',   paymentMethod: 'card' },
+  { id: 'b12', trainerId: 't1', studentId: 'u6',  date: '2026-04-10', time: '19:00', duration: 60, price: 180, status: 'cancelled',   paymentMethod: 'pix' },
+];
+
+export const mockAdminStats = {
+  totalStudents: 9,
+  activeTrainers: 8,
+  totalBookings: 12,
+  monthlyRevenue: 9420,
+  weeklyBookings: [2, 1, 3, 2, 1, 2, 1],
+  weekDays: ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'],
+  topModalities: [
+    { modality: 'Judô',      count: 421 },
+    { modality: 'Capoeira',  count: 268 },
+    { modality: 'Muay Thai', count: 256 },
+  ],
+};
+
 export const mockTeacherStats = {
   monthRevenue: 8420,
   totalLessonsThisMonth: 47,
