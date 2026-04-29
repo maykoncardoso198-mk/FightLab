@@ -18,7 +18,7 @@ import {
   SectionHeader,
   ModalityChip,
 } from '../../components';
-import { featuredDuel, modalitiesList, Modality } from '../../data';
+import { trainers, modalitiesList, Modality } from '../../data';
 import { useTrainers, useRanking } from '../../hooks/useTrainers';
 
 export default function HomeScreen() {
@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const [query, setQuery] = useState('');
   const ranking = useRanking().slice(0, 5);
   const nearby = useTrainers({ modality: activeModality }).slice(0, 6);
+  const weeklyTop = [...trainers].sort((a, b) => b.totalLessons - a.totalLessons).slice(0, 2);
 
   const goSearch = () => router.push('/(tabs)/search');
   const goTrainer = (id: string) => router.push(`/trainer/${id}`);
@@ -80,18 +81,16 @@ export default function HomeScreen() {
 
         <View style={styles.featuredWrap}>
           <TrainerCardFeatured
-            trainerA={featuredDuel.trainerA}
-            trainerB={featuredDuel.trainerB}
-            countdown={featuredDuel.countdown}
-            title={featuredDuel.duelTitle}
-            onPressA={() => goTrainer(featuredDuel.trainerA.id)}
-            onPressB={() => goTrainer(featuredDuel.trainerB.id)}
+            trainerA={weeklyTop[0]}
+            trainerB={weeklyTop[1]}
+            onPressA={() => goTrainer(weeklyTop[0].id)}
+            onPressB={() => goTrainer(weeklyTop[1].id)}
           />
         </View>
 
         <SectionHeader
           subtitle="RANKING"
-          title="BEST OF THE BEST"
+          title="OS MELHORES"
           actionLabel="VER TODOS"
           onActionPress={goSearch}
         />

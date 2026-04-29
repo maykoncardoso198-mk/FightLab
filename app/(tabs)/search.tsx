@@ -7,6 +7,7 @@ import {
   TextInput,
   Pressable,
   FlatList,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -29,6 +30,14 @@ const ratingRanges = [
   { label: '4.8+', min: 4.8 },
 ];
 
+type SortOption = 'relevancia' | 'avaliacao' | 'preco' | 'distancia';
+const sortOptions: { key: SortOption; label: string }[] = [
+  { key: 'relevancia', label: 'Relevância' },
+  { key: 'avaliacao', label: 'Maior avaliação' },
+  { key: 'preco', label: 'Menor preço' },
+  { key: 'distancia', label: 'Mais próximo' },
+];
+
 export default function SearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -36,6 +45,8 @@ export default function SearchScreen() {
   const [city, setCity] = useState<string>('Todas');
   const [priceIdx, setPriceIdx] = useState(0);
   const [ratingIdx, setRatingIdx] = useState(0);
+  const [sort, setSort] = useState<SortOption>('relevancia');
+  const [sortModalVisible, setSortModalVisible] = useState(false);
 
   const filters = useMemo(
     () => ({
@@ -48,13 +59,49 @@ export default function SearchScreen() {
     [query, modality, city, priceIdx, ratingIdx]
   );
 
-  const list = useTrainers(filters);
+  const baseList = useTrainers(filters);
+  const list = useMemo(() => {
+    const copy = [...baseList];
+    if (sort === 'avaliacao') copy.sort((a, b) => b.rating - a.rating);
+    else if (sort === 'preco') copy.sort((a, b) => a.pricePerHour - b.pricePerHour);
+    else if (sort === 'distancia') copy.sort((a, b) => a.distanceKm - b.distanceKm);
+    return copy;
+  }, [baseList, sort]);
+
+  const currentSortLabel = sortOptions.find((o) => o.key === sort)?.label ?? 'Relevância';
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <Modal
+        visible={sortModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSortModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setSortModalVisible(false)}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>ORDENAR POR</Text>
+            {sortOptions.map((o) => (
+              <Pressable
+                key={o.key}
+                onPress={() => { setSort(o.key); setSortModalVisible(false); }}
+                style={styles.modalOption}
+              >
+                <Text style={[styles.modalOptionText, sort === o.key && styles.modalOptionActive]}>
+                  {o.label}
+                </Text>
+                {sort === o.key && (
+                  <Ionicons name="checkmark" size={16} color={Colors.red} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+
       <View style={styles.header}>
         <Text style={styles.title}>BUSCAR</Text>
-        <Pressable hitSlop={12}>
+        <Pressable hitSlop={12} onPress={() => setSortModalVisible(true)}>
           <Ionicons name="filter" size={20} color={Colors.textPrimary} />
         </Pressable>
       </View>
@@ -157,8 +204,8 @@ export default function SearchScreen() {
 
             <View style={styles.resultHeader}>
               <Text style={styles.resultCount}>{list.length} PROFESSORES</Text>
-              <Pressable hitSlop={8} style={styles.sortBtn}>
-                <Text style={styles.sortText}>RELEVÂNCIA</Text>
+              <Pressable hitSlop={8} style={styles.sortBtn} onPress={() => setSortModalVisible(true)}>
+                <Text style={styles.sortText}>{currentSortLabel.toUpperCase()}</Text>
                 <Ionicons name="chevron-down" size={14} color={Colors.textPrimary} />
               </Pressable>
             </View>
@@ -289,5 +336,42 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyRegular,
     fontSize: 13,
     marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalBox: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 24,
+    borderTopWidth: 1,
+    borderColor: Colors.divider,
+  },
+  modalTitle: {
+    color: Colors.textSecondary,
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.6,
+    marginBottom: 16,
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.divider,
+  },
+  modalOptionText: {
+    color: Colors.textSecondary,
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 15,
+  },
+  modalOptionActive: {
+    color: Colors.textPrimary,
+    fontFamily: Fonts.bodyBold,
   },
 });

@@ -323,13 +323,6 @@ export const trainers: Trainer[] = [
   },
 ];
 
-export const featuredDuel = {
-  trainerA: trainers[0],
-  trainerB: trainers[1],
-  duelTitle: 'CONFRONTO DA SEMANA',
-  countdown: '02:14:36',
-};
-
 export const modalitiesList = [
   'Boxe',
   'Muay Thai',

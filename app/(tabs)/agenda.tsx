@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, Alert, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,7 +9,24 @@ import { trainers } from '../../data';
 
 export default function AgendaScreen() {
   const router = useRouter();
-  const { bookings } = useBookings();
+  const { bookings, cancelBooking } = useBookings();
+
+  const handleCancel = (id: string) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Cancelar esta aula? Esta ação não pode ser desfeita.')) {
+        cancelBooking(id);
+      }
+      return;
+    }
+    Alert.alert(
+      'Cancelar aula',
+      'Tem certeza que deseja cancelar esta aula? Esta ação não pode ser desfeita.',
+      [
+        { text: 'Voltar', style: 'cancel' },
+        { text: 'Cancelar aula', style: 'destructive', onPress: () => cancelBooking(id) },
+      ]
+    );
+  };
 
   const upcoming = bookings.filter((b) => b.status === 'confirmed' || b.status === 'pending');
   const past = bookings.filter((b) => b.status === 'completed' || b.status === 'cancelled');
@@ -77,7 +94,7 @@ export default function AgendaScreen() {
                     <Text style={styles.meta}> {item.time}</Text>
                   </View>
                 </View>
-                <View>
+                <View style={{ alignItems: 'flex-end', gap: 6 }}>
                   <View
                     style={[
                       styles.status,
@@ -96,6 +113,15 @@ export default function AgendaScreen() {
                     </Text>
                   </View>
                   <Text style={styles.price}>R$ {item.price}</Text>
+                  {isUpcoming && (
+                    <Pressable
+                      onPress={() => handleCancel(item.id)}
+                      style={styles.cancelBtn}
+                      hitSlop={6}
+                    >
+                      <Text style={styles.cancelBtnText}>CANCELAR</Text>
+                    </Pressable>
+                  )}
                 </View>
               </Pressable>
             </>
@@ -269,7 +295,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.numbersBold,
     fontSize: 14,
     textAlign: 'right',
-    marginTop: 6,
+  },
+  cancelBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(214,40,40,0.4)',
+  },
+  cancelBtnText: {
+    color: Colors.red,
+    fontFamily: Fonts.bodyBold,
+    fontSize: 9,
+    letterSpacing: 1.2,
   },
   empty: {
     alignItems: 'center',

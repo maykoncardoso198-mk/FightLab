@@ -7,25 +7,16 @@ import { Trainer } from '../data';
 interface Props {
   trainerA: Trainer;
   trainerB: Trainer;
-  countdown: string;
-  title: string;
   onPressA?: () => void;
   onPressB?: () => void;
 }
 
-export function TrainerCardFeatured({
-  trainerA,
-  trainerB,
-  countdown,
-  title,
-  onPressA,
-  onPressB,
-}: Props) {
+export function TrainerCardFeatured({ trainerA, trainerB, onPressA, onPressB }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.dot} />
-        <Text style={styles.headerText}>{title}</Text>
+        <Ionicons name="flame" size={14} color={Colors.red} />
+        <Text style={styles.headerText}>MAIS AULAS DA SEMANA</Text>
       </View>
 
       <View style={styles.duel}>
@@ -34,21 +25,22 @@ export function TrainerCardFeatured({
           style={({ pressed }) => [styles.side, pressed && { opacity: 0.85 }]}
         >
           <Image source={{ uri: trainerA.photo }} style={styles.image} contentFit="cover" />
-          <View style={[styles.sideGradient, { left: 0 }]} />
+          <View style={styles.sideGradient} />
+          <View style={styles.rankBadge}>
+            <Text style={styles.rankText}>#1</Text>
+          </View>
           <View style={styles.sideInfo}>
             <Text style={styles.modality}>{trainerA.primaryModality.toUpperCase()}</Text>
             <Text numberOfLines={2} style={styles.name}>
               {trainerA.name}
             </Text>
-            <Text style={styles.subtitle}>
-              {trainerA.rating.toFixed(1)} ★ · {trainerA.totalLessons} aulas
-            </Text>
+            <Text style={styles.lessonCount}>{trainerA.totalLessons} aulas</Text>
           </View>
         </Pressable>
 
         <View style={styles.center}>
-          <View style={styles.vsCircle}>
-            <Text style={styles.vsText}>VS</Text>
+          <View style={styles.trophyCircle}>
+            <Ionicons name="trophy" size={20} color={Colors.textPrimary} />
           </View>
         </View>
 
@@ -57,7 +49,10 @@ export function TrainerCardFeatured({
           style={({ pressed }) => [styles.side, pressed && { opacity: 0.85 }]}
         >
           <Image source={{ uri: trainerB.photo }} style={styles.image} contentFit="cover" />
-          <View style={[styles.sideGradient, { right: 0 }]} />
+          <View style={styles.sideGradient} />
+          <View style={[styles.rankBadge, styles.rankBadgeRight]}>
+            <Text style={styles.rankText}>#2</Text>
+          </View>
           <View style={[styles.sideInfo, styles.sideInfoRight]}>
             <Text style={[styles.modality, styles.alignRight]}>
               {trainerB.primaryModality.toUpperCase()}
@@ -65,17 +60,17 @@ export function TrainerCardFeatured({
             <Text numberOfLines={2} style={[styles.name, styles.alignRight]}>
               {trainerB.name}
             </Text>
-            <Text style={[styles.subtitle, styles.alignRight]}>
-              {trainerB.rating.toFixed(1)} ★ · {trainerB.totalLessons} aulas
+            <Text style={[styles.lessonCount, styles.alignRight]}>
+              {trainerB.totalLessons} aulas
             </Text>
           </View>
         </Pressable>
       </View>
 
       <View style={styles.footer}>
-        <Ionicons name="time-outline" size={14} color={Colors.textSecondary} />
-        <Text style={styles.footerText}>PRÓXIMA DISPONIBILIDADE EM</Text>
-        <Text style={styles.countdown}>{countdown}</Text>
+        <Ionicons name="stats-chart" size={13} color={Colors.textSecondary} />
+        <Text style={styles.footerText}>PROFESSORES MAIS CONTRATADOS</Text>
+        <Text style={styles.footerAccent}>ESTA SEMANA</Text>
       </View>
     </View>
   );
@@ -94,15 +89,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
     borderBottomWidth: 1,
     borderBottomColor: Colors.divider,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.red,
-    marginRight: 8,
   },
   headerText: {
     color: Colors.textPrimary,
@@ -128,7 +117,26 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: '100%',
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0,0,0,0.52)',
+  },
+  rankBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: Colors.red,
+    borderRadius: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  rankBadgeRight: {
+    left: undefined,
+    right: 12,
+  },
+  rankText: {
+    color: Colors.textPrimary,
+    fontFamily: Fonts.numbersBlack,
+    fontSize: 12,
+    letterSpacing: 0.5,
   },
   sideInfo: {
     position: 'absolute',
@@ -155,7 +163,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginTop: 4,
   },
-  subtitle: {
+  lessonCount: {
     color: Colors.textSecondary,
     fontFamily: Fonts.bodyRegular,
     fontSize: 11,
@@ -167,19 +175,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.background,
   },
-  vsCircle: {
+  trophyCircle: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.red,
+    backgroundColor: Colors.surfaceHigh,
+    borderWidth: 1,
+    borderColor: 'rgba(214,40,40,0.4)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  vsText: {
-    color: Colors.textPrimary,
-    fontFamily: Fonts.numbersBlack,
-    fontSize: 16,
-    letterSpacing: 1,
   },
   footer: {
     flexDirection: 'row',
@@ -188,19 +192,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: Colors.divider,
+    gap: 6,
   },
   footerText: {
     color: Colors.textSecondary,
     fontFamily: Fonts.bodyMedium,
     fontSize: 10,
     letterSpacing: 1.4,
-    marginLeft: 6,
     flex: 1,
   },
-  countdown: {
+  footerAccent: {
     color: Colors.red,
-    fontFamily: Fonts.numbersBold,
-    fontSize: 14,
-    letterSpacing: 1,
+    fontFamily: Fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.2,
   },
 });
