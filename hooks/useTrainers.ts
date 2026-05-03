@@ -1,18 +1,19 @@
-import { useMemo } from 'react';
-import { trainers, Trainer, Modality } from '../data';
+import { useState, useEffect, useMemo } from 'react';
+import { trainers as mockTrainers } from '../data';
+import { Trainer, Modality } from '../data';
+import {
+  fetchTrainers,
+  fetchTrainerById as apiFetchById,
+  fetchRanking,
+  TrainerFilters,
+} from '../lib/api/trainers';
+import { isSupabaseConfigured } from '../lib/supabase';
 
-interface Filters {
-  modality?: Modality | null;
-  city?: string | null;
-  minRating?: number;
-  maxPrice?: number;
-  query?: string;
-}
-
-export function useTrainers(filters: Filters = {}) {
-  const list = useMemo(() => {
-    return trainers.filter((t) => {
-      if (filters.modality && !t.modalities.includes(filters.modality)) return false;
+export function useTrainers(filters: TrainerFilters = {}) {
+  const [data, setData] = useState<Trainer[]>(() => {
+    // Inicia com mock data para não haver flash vazio
+    return mockTrainers.filter((t) => {
+      if (filters.modality && !t.modalities.includes(filters.modality as Modality)) return false;
       if (filters.city && t.city !== filters.city) return false;
       if (filters.minRating && t.rating < filters.minRating) return false;
       if (filters.maxPrice && t.pricePerHour > filters.maxPrice) return false;
@@ -23,18 +24,39 @@ export function useTrainers(filters: Filters = {}) {
       }
       return true;
     });
+  });
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    fetchTrainers(filters).then(setData);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.modality, filters.city, filters.minRating, filters.maxPrice, filters.query]);
 
-  return list;
+  return data;
 }
 
 export function useTrainerById(id: string | undefined): Trainer | undefined {
-  return useMemo(() => trainers.find((t) => t.id === id), [id]);
+  const [trainer, setTrainer] = useState<Trainer | undefined>(
+    () => mockTrainers.find((t) => t.id === id)
+  );
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    apiFetchById(id).then((t) => { if (t) setTrainer(t); });
+  }, [id]);
+
+  return trainer;
 }
 
 export function useRanking(): Trainer[] {
-  return useMemo(
-    () => [...trainers].sort((a, b) => a.rankingPosition - b.rankingPosition),
-    []
+  const [data, setData] = useState<Trainer[]>(() =>
+    [...mockTrainers].sort((a, b) => a.rankingPosition - b.rankingPosition)
   );
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    fetchRanking().then(setData);
+  }, []);
+
+  return data;
 }

@@ -1,3 +1,7 @@
+# Environment variables — nunca commite
+.env.local
+.env.*.local
+
 node_modules/
 .expo/
 dist/

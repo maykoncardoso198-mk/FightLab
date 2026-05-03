@@ -1,45 +1,40 @@
 import { useEffect, useState, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Booking, mockBookings } from '../data';
+import {
+  fetchBookings,
+  createBooking,
+  updateBookingStatus,
+} from '../lib/api/bookings';
+import { isSupabaseConfigured } from '../lib/supabase';
 
-const KEY = '@fightlab/bookings';
-
-export function useBookings() {
+export function useBookings(studentId?: string) {
   const [bookings, setBookings] = useState<Booking[]>(mockBookings);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(KEY);
-        if (raw) setBookings(JSON.parse(raw));
-      } catch {}
+    fetchBookings(studentId).then((data) => {
+      setBookings(data);
       setLoading(false);
-    })();
-  }, []);
-
-  const persist = async (next: Booking[]) => {
-    setBookings(next);
-    await AsyncStorage.setItem(KEY, JSON.stringify(next));
-  };
+    });
+  }, [studentId]);
 
   const addBooking = useCallback(
     async (booking: Omit<Booking, 'id'>) => {
-      const next: Booking = { ...booking, id: `b${Date.now()}` };
-      await persist([next, ...bookings]);
-      return next;
+      const created = await createBooking(booking);
+      setBookings((prev) => [created, ...prev]);
+      return created;
     },
-    [bookings]
+    []
   );
 
   const cancelBooking = useCallback(
     async (id: string) => {
-      const next = bookings.map((b) =>
-        b.id === id ? { ...b, status: 'cancelled' as const } : b
+      await updateBookingStatus(id, 'cancelled');
+      setBookings((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status: 'cancelled' as const } : b))
       );
-      await persist(next);
     },
-    [bookings]
+    []
   );
 
   return { bookings, loading, addBooking, cancelBooking };
