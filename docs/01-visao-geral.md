@@ -19,7 +19,8 @@ Plataforma onde **alunos** encontram, avaliam e agendam aulas com **professores*
 | Navegação | Expo Router 3 (file-based) |
 | Animações | React Native Reanimated 3 |
 | Imagens | expo-image |
-| Persistência local | AsyncStorage (`@fightlab/user`, `@fightlab/bookings`) |
+| Backend | Supabase (PostgreSQL + Auth + Storage + Realtime) |
+| Persistência local | AsyncStorage / localStorage (sessão Supabase) |
 | Tipagem | TypeScript strict |
 | Web / Deploy | Expo static export → Vercel |
 
@@ -33,6 +34,7 @@ Plataforma onde **alunos** encontram, avaliam e agendam aulas com **professores*
 | `/onboarding` | `app/onboarding.tsx` | Escolha de perfil: Aluno ou Professor |
 | `/(auth)/login` | `app/(auth)/login.tsx` | Login |
 | `/(auth)/register` | `app/(auth)/register.tsx` | Cadastro (campos variam por role) |
+| `/(admin)/` | `app/(admin)/index.tsx` | Área admin: KPIs, professores, alunos, agendamentos |
 | `/(tabs)/` | `app/(tabs)/index.tsx` | Home do aluno: destaque duel, ranking, próximos |
 | `/(tabs)/search` | `app/(tabs)/search.tsx` | Busca com filtros de modalidade, cidade e preço |
 | `/(tabs)/agenda` | `app/(tabs)/agenda.tsx` | Aulas agendadas e histórico do aluno |
@@ -52,6 +54,7 @@ Plataforma onde **alunos** encontram, avaliam e agendam aulas com **professores*
 app/              → telas (Expo Router — cada arquivo = rota)
   (auth)/         → fluxo de autenticação
   (tabs)/         → abas principais do aluno
+  (admin)/        → área administrativa (role admin)
   booking/        → agendamento dinâmico por professor
   trainer/        → perfil dinâmico por professor
   chat/           → chat dinâmico por professor
@@ -60,6 +63,11 @@ components/       → componentes reutilizáveis
 constants/        → design tokens (cores, fontes, espaçamentos)
 data/             → tipos TypeScript + dados mock
 hooks/            → lógica de estado (auth, bookings, trainers, fonts)
+lib/
+  supabase.ts     → cliente Supabase SSR-safe
+  api/
+    trainers.ts   → fetch de professores + mapper DB→TS
+    bookings.ts   → CRUD de agendamentos + mapper DB→TS
 docs/             → documentação do projeto
 ```
 
@@ -85,17 +93,18 @@ docs/             → documentação do projeto
 
 ## Dados
 
-Toda a app roda com **dados mock** — nenhuma API externa ainda.
+O app usa **Supabase como backend** com fallback automático para dados mock quando as variáveis de ambiente não estão configuradas.
 
 | Arquivo | Conteúdo |
 |---|---|
 | `data/types.ts` | Interfaces: Trainer, User, Booking, ChatMessage, DaySchedule |
-| `data/trainers.ts` | 8 professores com schedule, reviews e ratingHistory |
-| `data/user.ts` | mockStudent, mockTrainerUser, mockBookings, mockChatMessages |
+| `data/trainers.ts` | 8 professores mock (fallback quando Supabase ausente) |
+| `data/user.ts` | mockStudent, mockAdmin, mockStudents (9), mockAllBookings (12) |
+| `lib/api/trainers.ts` | Queries reais ao Supabase com mapper PT→EN |
+| `lib/api/bookings.ts` | CRUD real de agendamentos com mapper PT→EN |
+| `docs/02-supabase-schema.sql` | Schema completo: 6 tabelas + RLS + trigger de auth |
 
-Persistência real usa **AsyncStorage** apenas para:
-- Usuário logado (`@fightlab/user`)
-- Agendamentos criados em sessão (`@fightlab/bookings`)
+Ver detalhes completos em [03-backend-supabase.md](./03-backend-supabase.md).
 
 ---
 
@@ -110,17 +119,22 @@ Splash → Onboarding → Register/Login
 
 ---
 
-## O que ainda não existe (próximos passos)
+## Próximos passos (backend)
 
-- Backend real (API + banco de dados)
-- Autenticação real (hoje é mock com AsyncStorage)
-- Upload de foto de perfil
+| Etapa | O que é |
+|---|---|
+| ETAPA 2 | Supabase Auth real — login, cadastro, logout, proteção de rotas |
+| ETAPA 3 | Upload de foto via expo-image-picker → Supabase Storage |
+| ETAPA 4 | Booking real no DB + bloqueio de slots + dashboard real |
+| ETAPA 5 | Chat em tempo real com Supabase Realtime + badges |
+
+Outras evoluções futuras:
 - Notificações push
 - Mapa de professores por localização
-- Sistema de assinatura real (hoje é UI apenas)
+- Sistema de assinatura real
 - Painel do professor com edição de agenda
 - Avaliação pós-aula pelo aluno
 
 ---
 
-_Última atualização: 2026-04-29_
+_Última atualização: 2026-05-03_
