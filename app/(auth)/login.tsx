@@ -17,21 +17,30 @@ import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, signInAsAdmin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError('Preencha email e senha.');
+      return;
+    }
+    setError('');
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    await signIn('student');
+    const result = await signIn(email.trim(), password);
     setLoading(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     router.replace('/(tabs)');
   };
 
   const handleAdminAccess = async () => {
-    await signIn('admin');
+    await signInAsAdmin();
     router.replace('/(admin)');
   };
 
@@ -79,7 +88,14 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          <View style={{ marginTop: 28 }}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Ionicons name="alert-circle-outline" size={14} color={Colors.red} />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
+
+          <View style={{ marginTop: 16 }}>
             <PrimaryButton label="ENTRAR" onPress={handleLogin} loading={loading} />
           </View>
 
@@ -219,5 +235,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyMedium,
     fontSize: 12,
     letterSpacing: 0.5,
+  },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(214,40,40,0.08)',
+    borderRadius: Radius.sm,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 12,
+  },
+  errorText: {
+    color: Colors.red,
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 13,
+    flex: 1,
   },
 });

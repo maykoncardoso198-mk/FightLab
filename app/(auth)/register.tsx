@@ -22,7 +22,7 @@ export default function RegisterScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ role?: Role }>();
   const role: Role = (params.role as Role) || 'student';
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -32,6 +32,7 @@ export default function RegisterScreen() {
   const [pricePerHour, setPricePerHour] = useState('');
   const [modalities, setModalities] = useState<Modality[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const isTeacher = role === 'trainer';
 
@@ -42,10 +43,18 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError('Preencha nome, email e senha.');
+      return;
+    }
+    setError('');
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    await signIn(role, name || undefined);
+    const result = await signUp({ name: name.trim(), email: email.trim(), password, city: city.trim(), role });
     setLoading(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     if (isTeacher) router.replace('/dashboard');
     else router.replace('/(tabs)');
   };
@@ -147,7 +156,14 @@ export default function RegisterScreen() {
             )}
           </View>
 
-          <View style={{ marginTop: 22 }}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Ionicons name="alert-circle-outline" size={14} color={Colors.red} />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
+
+          <View style={{ marginTop: 16 }}>
             <PrimaryButton label="CRIAR CONTA" onPress={handleRegister} loading={loading} />
           </View>
 
@@ -294,5 +310,21 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontFamily: Fonts.bodyRegular,
     fontSize: 14,
+  },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(214,40,40,0.08)',
+    borderRadius: Radius.sm,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 12,
+  },
+  errorText: {
+    color: Colors.red,
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 13,
+    flex: 1,
   },
 });
