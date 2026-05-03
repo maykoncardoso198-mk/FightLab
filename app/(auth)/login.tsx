@@ -17,7 +17,7 @@ import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn, signInAsAdmin } = useAuth();
+  const { signIn, signInAsAdmin, signInAsDemo } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -119,10 +119,26 @@ export default function LoginScreen() {
             </Text>
           </Pressable>
 
-          <Pressable style={styles.adminLink} onPress={handleAdminAccess}>
-            <Ionicons name="shield-checkmark-outline" size={13} color={Colors.textMuted} />
-            <Text style={styles.adminLinkText}>Acesso Admin (demo)</Text>
-          </Pressable>
+          <View style={styles.demoRow}>
+            <Pressable
+              style={styles.demoBtn}
+              onPress={async () => { await signInAsDemo('student'); router.replace('/(tabs)'); }}
+            >
+              <Ionicons name="person-outline" size={13} color={Colors.textMuted} />
+              <Text style={styles.adminLinkText}>Aluno (demo)</Text>
+            </Pressable>
+            <Pressable
+              style={styles.demoBtn}
+              onPress={async () => { await signInAsDemo('trainer'); router.replace('/dashboard'); }}
+            >
+              <Ionicons name="fitness-outline" size={13} color={Colors.textMuted} />
+              <Text style={styles.adminLinkText}>Professor (demo)</Text>
+            </Pressable>
+            <Pressable style={styles.demoBtn} onPress={handleAdminAccess}>
+              <Ionicons name="shield-checkmark-outline" size={13} color={Colors.textMuted} />
+              <Text style={styles.adminLinkText}>Admin (demo)</Text>
+            </Pressable>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -222,12 +238,16 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyRegular,
     fontSize: 14,
   },
-  adminLink: {
+  demoRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 20,
+  },
+  demoBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: 20,
+    gap: 5,
     paddingVertical: 8,
   },
   adminLinkText: {

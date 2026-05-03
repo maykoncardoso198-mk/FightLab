@@ -7,7 +7,7 @@ import React, {
   useCallback,
 } from 'react';
 import { User } from '../data/types';
-import { mockAdmin } from '../data/user';
+import { mockAdmin, mockStudent, mockTrainerUser } from '../data/user';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   apiSignIn,
@@ -53,6 +53,7 @@ export interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (params: SignUpParams) => Promise<{ error?: string }>;
   signInAsAdmin: () => Promise<void>;
+  signInAsDemo: (role?: 'student' | 'trainer') => Promise<void>;
   signOut: () => Promise<void>;
   toggleFavorite: (trainerId: string) => Promise<void>;
 }
@@ -127,6 +128,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(mockAdmin);
   }, []);
 
+  const signInAsDemo = useCallback(async (role: 'student' | 'trainer' = 'student') => {
+    setUser(role === 'trainer' ? mockTrainerUser : mockStudent);
+  }, []);
+
   const signOut = useCallback(async () => {
     await apiSignOut();
     setUser(null);
@@ -147,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, signIn, signUp, signInAsAdmin, signOut, toggleFavorite }}
+      value={{ user, loading, signIn, signUp, signInAsAdmin, signInAsDemo, signOut, toggleFavorite }}
     >
       {children}
     </AuthContext.Provider>
