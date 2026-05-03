@@ -16,6 +16,7 @@ import {
   getSessionUser,
   SignUpParams,
 } from '../lib/api/auth';
+import { uploadAvatar, persistUserPhoto } from '../lib/api/storage';
 
 const FAV_KEY = '@fightlab/favorites';
 
@@ -56,6 +57,7 @@ export interface AuthContextValue {
   signInAsDemo: (role?: 'student' | 'trainer') => Promise<void>;
   signOut: () => Promise<void>;
   toggleFavorite: (trainerId: string) => Promise<void>;
+  updateUserPhoto: (uri: string) => Promise<{ error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -137,6 +139,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateUserPhoto = useCallback(
+    async (uri: string) => {
+      if (!user) return { error: 'Não autenticado.' };
+      const result = await uploadAvatar(user.id, uri);
+      if (result.error) return { error: result.error };
+      if (result.url) {
+        await persistUserPhoto(user.id, result.url);
+        setUser((prev) => (prev ? { ...prev, photo: result.url! } : prev));
+      }
+      return {};
+    },
+    [user]
+  );
+
   const toggleFavorite = useCallback(
     async (trainerId: string) => {
       if (!user) return;
@@ -152,7 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, signIn, signUp, signInAsAdmin, signInAsDemo, signOut, toggleFavorite }}
+      value={{ user, loading, signIn, signUp, signInAsAdmin, signInAsDemo, signOut, toggleFavorite, updateUserPhoto }}
     >
       {children}
     </AuthContext.Provider>

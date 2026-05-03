@@ -1,9 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import { Colors, Fonts, Radius, Spacing } from '../../constants';
 import { useAuth } from '../../hooks/useAuth';
 import { useBookings } from '../../hooks/useBookings';
@@ -12,7 +14,8 @@ import { TrainerCard } from '../../components';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, updateUserPhoto } = useAuth();
+  const [uploading, setUploading] = useState(false);
   const { bookings } = useBookings();
   const profile = user || mockStudent;
 
@@ -22,6 +25,22 @@ export default function ProfileScreen() {
   const totalSpent = bookings
     .filter((b) => b.status === 'completed')
     .reduce((acc, b) => acc + b.price, 0);
+
+  const handleChangePhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'] as any,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setUploading(true);
+      await updateUserPhoto(result.assets[0].uri);
+      setUploading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -53,7 +72,15 @@ export default function ProfileScreen() {
               </Pressable>
             </View>
 
-            <Image source={{ uri: profile.photo }} style={styles.avatar} contentFit="cover" />
+            <Pressable onPress={handleChangePhoto} style={styles.avatarWrap}>
+              <Image source={{ uri: profile.photo }} style={styles.avatar} contentFit="cover" />
+              <View style={styles.cameraBtn}>
+                {uploading
+                  ? <ActivityIndicator size="small" color={Colors.textPrimary} />
+                  : <Ionicons name="camera" size={14} color={Colors.textPrimary} />
+                }
+              </View>
+            </Pressable>
             <Text style={styles.name}>{profile.name.toUpperCase()}</Text>
             <View style={styles.cityRow}>
               <Ionicons name="location" size={12} color={Colors.textSecondary} />
@@ -256,13 +283,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     letterSpacing: 2,
   },
+  avatarWrap: {
+    marginTop: 18,
+    position: 'relative',
+  },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
     borderColor: Colors.red,
-    marginTop: 18,
+  },
+  cameraBtn: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.red,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.background,
   },
   name: {
     color: Colors.textPrimary,
